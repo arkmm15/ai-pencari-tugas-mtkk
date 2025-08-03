@@ -1,43 +1,32 @@
-const API_KEY = "AIzaSyBb8FweBj8ejXAmUctKxDhA_xWANWPfXrU";
-const CX = "03b3ef786b8034413";
+const apiKey = "AIzaSyBb8FweBj8ejXAmUctKxDhA_xWANWPfXrU";
+const cx = "03b3ef786b8034413";
 
-async function searchGoogle(query) {
-  const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&q=${encodeURIComponent(query)}`;
-  
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
+const form = document.getElementById("searchForm");
+const input = document.getElementById("searchInput");
+const resultsDiv = document.getElementById("results");
 
-    if (data.items) {
-      displayResults(data.items);
-    } else {
-      document.getElementById("results").innerHTML = "Tidak ada hasil ditemukan.";
-    }
-  } catch (err) {
-    console.error("Gagal mengambil data:", err);
-    document.getElementById("results").innerHTML = "Terjadi kesalahan saat memuat data.";
-  }
-}
-
-function displayResults(items) {
-  const container = document.getElementById("results");
-  container.innerHTML = "";
-
-  items.forEach(item => {
-    const result = document.createElement("div");
-    result.className = "result";
-    result.innerHTML = `
-      <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-      <p>${item.snippet}</p>
-    `;
-    container.appendChild(result);
-  });
-}
-
-document.getElementById("searchForm").addEventListener("submit", function(e) {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const query = document.getElementById("searchInput").value.trim();
-  if (query) {
-    searchGoogle(query);
+  const query = input.value.trim();
+  if (!query) return;
+
+  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${encodeURIComponent(query)}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  resultsDiv.innerHTML = "";
+  if (data.items) {
+    data.items.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "result";
+      div.innerHTML = `
+        <a href="${item.link}" target="_blank"><h3>${item.title}</h3></a>
+        <p>${item.snippet}</p>
+      `;
+      resultsDiv.appendChild(div);
+    });
+  } else {
+    resultsDiv.innerHTML = "<p>Tidak ada hasil ditemukan.</p>";
   }
 });
